@@ -407,7 +407,8 @@ button{font:inherit;color:inherit}
   .stats,.totals{grid-template-columns:1fr}
   .stat+.stat{padding-left:0;border-left:0;border-top:1px solid var(--line)}
   .total+.total{border-left:0;border-top:1px solid var(--line)}
-  .actions .btn:not(.primary){display:none}
+  .actions{flex-wrap:wrap}
+  .actions .btn:not(.primary):not(#report-state){display:none}
   .pub-search{display:none}
   .cand h1{font-size:32px}
   .how{grid-template-columns:1fr}
@@ -933,7 +934,7 @@ window.addEventListener('hashchange',route);route();
 (function(){
  let v=118000,pts=[];
  for(let d=0;d<60;d++){v+=(d%14===13?-21000:0)+(d%7===3?-6000:0)+2300+Math.sin(d*1.7)*2600+(d>40?900:0);pts.push(v)}
- pts[59]=184632;
+ {const f=184632/pts[59];pts=pts.map(v=>v*f);}
  const min=Math.min(...pts)*0.96,max=Math.max(...pts)*1.02,W=400,H=100;
  const xy=pts.map((p,i)=>[i/(pts.length-1)*W,H-(p-min)/(max-min)*H]);
  const d=xy.map((p,i)=>(i?'L':'M')+p[0].toFixed(1)+' '+p[1].toFixed(1)).join(' ');
