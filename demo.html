@@ -622,7 +622,7 @@ button{font:inherit;color:inherit}
           <div>
             <h1>Morgan Hale</h1>
             <p>Candidate, NC State Senate · District 18 · <a href="#race" style="color:var(--accent);font-weight:500;text-decoration:none">Compare the race →</a></p>
-            <div class="cactions"><button type="button" class="btn fbtn-follow" data-follow="hale">Follow</button><span class="muted-s">3,214 followers</span></div>
+            <div class="cactions"><button type="button" class="btn fbtn-follow" data-follow="hale">Follow</button><span class="muted-s"><span class="num" data-fcount="hale">3,214</span> followers</span></div>
           </div>
         </div>
         <div class="pledge">
@@ -1069,8 +1069,8 @@ document.getElementById('import-btn').onclick=()=>{
  const row=(label,a,b,stale)=>`<div class="cmp-row"><div class="cmp-label">${label}</div><div class="cell glass"><span class="ctag">Morgan Hale</span>${a}</div><div class="cell${stale?' stale':''}"><span class="ctag">Daniel Price</span>${b}</div></div>`;
  document.getElementById('cmp').innerHTML=
   `<div class="cmp-row" id="cmp-cands"><div class="cmp-label">Candidates</div>
-    <div class="cell ccard glass"><div class="avatar">MH</div><div><h2>Morgan Hale</h2><span class="muted">Candidate · <a href="#public" style="color:var(--accent);text-decoration:none;font-weight:500">Full glass box →</a></span><div class="cactions"><button type="button" class="btn fbtn-follow" data-follow="hale">Follow</button><span class="muted-s">3,214 followers</span></div></div></div>
-    <div class="cell ccard stale"><div class="avatar" style="background:var(--sunk);color:var(--ink-2)">DP</div><div><h2>Daniel Price</h2><span class="muted">Candidate</span><div class="cactions"><button type="button" class="btn fbtn-follow" data-follow="price">Follow</button><button type="button" class="btn primary" id="ask-btn">Ask him to take the pledge</button></div><div class="asked"><b class="num" id="ask-count">1,847</b> verified District 18 voters have asked</div></div></div></div>`
+    <div class="cell ccard glass"><div class="avatar">MH</div><div><h2>Morgan Hale</h2><span class="muted">Candidate · <a href="#public" style="color:var(--accent);text-decoration:none;font-weight:500">Full glass box →</a></span><div class="cactions"><button type="button" class="btn fbtn-follow" data-follow="hale">Follow</button><span class="muted-s"><span class="num" data-fcount="hale">3,214</span> followers</span></div></div></div>
+    <div class="cell ccard stale"><div class="avatar" style="background:var(--sunk);color:var(--ink-2)">DP</div><div><h2>Daniel Price</h2><span class="muted">Candidate</span><div class="cactions"><button type="button" class="btn fbtn-follow" data-follow="price">Follow</button><span class="muted-s"><span class="num" data-fcount="price">2,876</span> followers</span></div><div class="cactions"><button type="button" class="btn primary" id="ask-btn">Ask him to take the pledge</button><span class="muted-s"><b class="num" id="ask-count" style="color:var(--ink)">1,847</b> voters have asked</span></div></div></div></div>`
  +row('Transparency',
    `<span class="badge on">${chk}Glass box pledge</span><span class="say">Every campaign dollar runs through one public account.</span><span class="live" style="align-self:flex-start"><i></i>Live · last entry 2 min ago</span>`,
    `<span class="badge off">No glass box</span><span class="say">Built from state filings. Last report filed Oct 15, <b class="stale-txt">${ago} days ago</b>.</span><span class="muted">Next scheduled report: January</span>`,true)
@@ -1260,7 +1260,7 @@ document.getElementById('m-set').onclick=()=>showPane(document.getElementById('c
  };
  const following={};
  const sw=(id,on,l)=>`<label class="sw"><input type="checkbox" id="${id}" aria-label="${l}"${on?' checked':''}><span></span></label>`;
- function sync(){document.querySelectorAll('[data-follow]').forEach(b=>{const on=following[b.dataset.follow];b.classList.toggle('on',!!on);b.textContent=on?'Following ✓':'Follow'})}
+ function sync(){document.querySelectorAll('[data-follow]').forEach(b=>{const on=following[b.dataset.follow];b.classList.toggle('on',!!on);b.textContent=on?'Following ✓':'Follow'});const base={hale:3214,price:2876};document.querySelectorAll('[data-fcount]').forEach(el=>{const k=el.dataset.fcount;el.textContent=(base[k]+(following[k]?1:0)).toLocaleString('en-US')})}
  function followPanel(k){const c=C[k];
   panel('Follow '+c.name,`<form class="form" id="f-follow">
    <p style="margin:0;color:var(--ink-2);font-size:13px">Choose what you want to hear about.</p>
