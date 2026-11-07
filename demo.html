@@ -364,6 +364,18 @@ button{font:inherit;color:inherit}
 .toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translate(-50%,16px);opacity:0;background:var(--ink);color:var(--bg);padding:9px 16px;border-radius:10px;font-size:13px;font-weight:500;z-index:45;transition:opacity .2s,transform .2s;pointer-events:none;max-width:calc(100vw - 32px)}
 .toast.show{opacity:1;transform:translate(-50%,0)}
 
+/* follow + ask */
+.cactions{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:10px}
+.cactions .btn{padding:6px 12px;font-size:13px}
+.muted-s{font-size:12.5px;color:var(--ink-3)}
+.fbtn-follow.on{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
+.asked{margin-top:8px;font-size:12.5px;color:var(--ink-2)}
+.asked b{color:var(--ink)}
+.trig{display:flex;flex-direction:column}
+.trig .srow{padding:10px 0}
+.trig .srow:first-child{padding-top:0}
+.src-note{font-size:12.5px;color:var(--ink-2);background:var(--sunk);border-radius:8px;padding:10px 12px}
+
 /* filters + search */
 .toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:10px}
 .search{flex:1 1 220px;min-width:0;display:flex;align-items:center;gap:8px;border:1px solid var(--line);background:var(--surface);border-radius:9px;padding:0 10px;color:var(--ink-3)}
@@ -610,6 +622,7 @@ button{font:inherit;color:inherit}
           <div>
             <h1>Morgan Hale</h1>
             <p>Candidate, NC State Senate · District 18 · <a href="#race" style="color:var(--accent);font-weight:500;text-decoration:none">Compare the race →</a></p>
+            <div class="cactions"><button type="button" class="btn fbtn-follow" data-follow="hale">Follow</button><span class="muted-s">3,214 followers</span></div>
           </div>
         </div>
         <div class="pledge">
@@ -1056,8 +1069,8 @@ document.getElementById('import-btn').onclick=()=>{
  const row=(label,a,b,stale)=>`<div class="cmp-row"><div class="cmp-label">${label}</div><div class="cell glass"><span class="ctag">Morgan Hale</span>${a}</div><div class="cell${stale?' stale':''}"><span class="ctag">Daniel Price</span>${b}</div></div>`;
  document.getElementById('cmp').innerHTML=
   `<div class="cmp-row" id="cmp-cands"><div class="cmp-label">Candidates</div>
-    <div class="cell ccard glass"><div class="avatar">MH</div><div><h2>Morgan Hale</h2><span class="muted">Candidate · <a href="#public" style="color:var(--accent);text-decoration:none;font-weight:500">Full glass box →</a></span></div></div>
-    <div class="cell ccard stale"><div class="avatar" style="background:var(--sunk);color:var(--ink-2)">DP</div><div><h2>Daniel Price</h2><span class="muted">Candidate</span></div></div></div>`
+    <div class="cell ccard glass"><div class="avatar">MH</div><div><h2>Morgan Hale</h2><span class="muted">Candidate · <a href="#public" style="color:var(--accent);text-decoration:none;font-weight:500">Full glass box →</a></span><div class="cactions"><button type="button" class="btn fbtn-follow" data-follow="hale">Follow</button><span class="muted-s">3,214 followers</span></div></div></div>
+    <div class="cell ccard stale"><div class="avatar" style="background:var(--sunk);color:var(--ink-2)">DP</div><div><h2>Daniel Price</h2><span class="muted">Candidate</span><div class="cactions"><button type="button" class="btn fbtn-follow" data-follow="price">Follow</button><button type="button" class="btn primary" id="ask-btn">Ask him to take the pledge</button></div><div class="asked"><b class="num" id="ask-count">1,847</b> verified District 18 voters have asked</div></div></div></div>`
  +row('Transparency',
    `<span class="badge on">${chk}Glass box pledge</span><span class="say">Every campaign dollar runs through one public account.</span><span class="live" style="align-self:flex-start"><i></i>Live · last entry 2 min ago</span>`,
    `<span class="badge off">No glass box</span><span class="say">Built from state filings. Last report filed Oct 15, <b class="stale-txt">${ago} days ago</b>.</span><span class="muted">Next scheduled report: January</span>`,true)
@@ -1094,7 +1107,7 @@ const Tour=(()=>{
   {view:'public',target:'#p-q',title:'Search the public record',body:'Try typing "Fieldline" to see ad spending traced to the platforms it paid. Then try "Dana": a $25 donor isn\'t listed by name, because small donors stay private.'},
   {view:'public',target:'#oc',title:'Outside money',body:'Spending by other groups, sorted three ways. Dark money supporting Hale has to be disavowed within 72 hours, and the countdown is public. Anyone can report an ad or mailer that\'s missing.'},
   {view:'public',target:'#sw-race',title:'Compare the race',body:'Here\'s where it gets interesting.',wait:'Click Race view',done:()=>curView()==='race'},
-  {view:'race',target:'#cmp',title:'Same race, two standards',body:'Hale\'s numbers are live. Her opponent doesn\'t have a glass box, so his page is built from state filings that are weeks old. Nobody has to say anything. The difference makes the case.'},
+  {view:'race',target:'#cmp',title:'Same race, two standards',body:'Hale\'s numbers are live. Her opponent doesn\'t have a glass box, so his page is built from state filings that are weeks old. Nobody has to say anything. The difference makes the case. Voters can follow either candidate, and ask the one without a glass box to take the pledge.'},
   {modal:'end'}
  ];
  const ring=document.createElement('div');ring.className='tour-ring';ring.hidden=true;
@@ -1225,6 +1238,63 @@ document.getElementById('m-set').onclick=()=>showPane(document.getElementById('c
   document.getElementById('leave-no').onclick=()=>{document.getElementById('leave').innerHTML='<span>You\'re still in the pledge.</span>'};
   document.getElementById('leave-yes').onclick=()=>toast('Demo: the pledge stays on in this demo')};
  draw();
+})();
+
+/* ================= follow + ask: one alert system for every candidate ================= */
+(function(){
+ // Triggers depend on the data that exists: live records for glass boxes, filings and verified outside spending for everyone else
+ const C={
+  hale:{name:'Morgan Hale',glass:true,trig:[
+   ['Large donations','Any single donation over $1,000',true],
+   ['Transparent PAC support','A glass-box PAC gives or spends in support',true],
+   ['New dark money support','And whether Hale disavows it before the deadline',true],
+   ['New opposition spending','Transparent or dark',true],
+   ['Held or returned money','Over-limit gifts and money from sources that hide their donors',false],
+   ['Weekly summary','Raised, spent, and outside money for the week',false]]},
+  price:{name:'Daniel Price',glass:false,trig:[
+   ['New state filing','When Price files a campaign finance report',true],
+   ['New dark money support','Verified spending by groups that hide their donors',true],
+   ['New opposition spending','Transparent or dark',true],
+   ['Takes the glass box pledge','When his campaign opens a glass box',true],
+   ['Weekly summary','Outside money in the race for the week',false]]}
+ };
+ const following={};
+ const sw=(id,on,l)=>`<label class="sw"><input type="checkbox" id="${id}" aria-label="${l}"${on?' checked':''}><span></span></label>`;
+ function sync(){document.querySelectorAll('[data-follow]').forEach(b=>{const on=following[b.dataset.follow];b.classList.toggle('on',!!on);b.textContent=on?'Following ✓':'Follow'})}
+ function followPanel(k){const c=C[k];
+  panel('Follow '+c.name,`<form class="form" id="f-follow">
+   <p style="margin:0;color:var(--ink-2);font-size:13px">Choose what you want to hear about.</p>
+   <div class="trig">${c.trig.map(([t,d,on],j)=>`<div class="srow"><div><b>${t}</b><small>${d}</small></div>${sw('ft-'+j,on,t)}</div>`).join('')}</div>
+   ${c.glass?'<div class="src-note">Hale has a glass box, so these alerts arrive within minutes of the transaction.</div>'
+     :'<div class="src-note">Price doesn\'t have a glass box. His alerts come from state filings and verified outside spending, so they arrive only when those are published, sometimes weeks after the money moved.</div>'}
+   <fieldset><legend>Send alerts by</legend><div class="radios"><label><input type="radio" name="fv" id="fv-e" value="email" checked> Email</label><label><input type="radio" name="fv" id="fv-t" value="text"> Text message</label></div></fieldset>
+   <label for="f-contact">Email or phone<input id="f-contact" required placeholder="you@example.com"></label>
+   <div class="form-note">Demo: nothing is saved. Following someone is never shown publicly.</div>
+   <button type="submit" class="btn primary">${following[k]?'Update alerts':'Follow '+c.name}</button></form>`);
+  document.getElementById('f-follow').addEventListener('submit',e=>{e.preventDefault();following[k]=true;sync();close();toast(`You're following ${c.name}`)});
+ }
+ document.addEventListener('click',e=>{const b=e.target.closest('[data-follow]');if(b)followPanel(b.dataset.follow)});
+
+ let asks=1847,asked=false;
+ document.getElementById('ask-btn').onclick=()=>{
+  if(asked){toast('You\'ve already asked. Thank you.');return}
+  panel('Ask Daniel Price to take the pledge',`<form class="form" id="f-ask">
+   <p style="margin:0;color:var(--ink-2);font-size:13px">Add your voice to the voters in District 18 asking Price to run his campaign money through a glass box.</p>
+   <label for="a-name">Full name<input id="a-name" required autocomplete="name"></label>
+   <label for="a-street">Street address<input id="a-street" required autocomplete="street-address"></label>
+   <label for="a-zip">ZIP code<input id="a-zip" required inputmode="numeric" autocomplete="postal-code" placeholder="27312"></label>
+   <label for="a-msg">Message to the campaign<span class="hint">Optional. Sent with the request, never published.</span><textarea id="a-msg"></textarea></label>
+   <div class="src-note">We check your name and address against the state voter file to confirm you're registered in District 18. Only the total count is public. Your name is never shown.</div>
+   <div class="form-note">Demo: nothing is saved or checked.</div>
+   <button type="submit" class="btn primary">Send my request</button></form>`);
+  document.getElementById('f-ask').addEventListener('submit',e=>{e.preventDefault();asked=true;asks++;
+   document.getElementById('ask-count').textContent=asks.toLocaleString('en-US');
+   const b=document.getElementById('ask-btn');b.textContent='You asked ✓';b.classList.remove('primary');
+   document.getElementById('d-body').innerHTML=`<div class="sent"><h3>Request counted</h3><p style="margin:0">You're one of <b>${asks.toLocaleString('en-US')}</b> verified District 18 voters asking Daniel Price to take the pledge.</p>
+    <ol><li>The count on his public page goes up right away.</li><li>His campaign is notified each time the count passes another 500.</li><li>If he takes the pledge, everyone who asked hears about it first.</li></ol>
+    <button type="button" class="btn" id="a-done">Done</button></div>`;
+   document.getElementById('a-done').onclick=close;});
+ };
 })();
 </script>
 
